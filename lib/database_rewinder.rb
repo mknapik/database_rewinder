@@ -63,7 +63,7 @@ module DatabaseRewinder
         end
       end or return
 
-      match = sql.match(/\AINSERT(?:\s+IGNORE)?\s+INTO\s+(?:\.*[`"]?([^.\s`"]+)[`"]?)*/i)
+      match = sql.match(/\A(?:(?:LOAD\s+DATA\s+LOCAL\s+INFILE\s+\S+\s+REPLACE\s+INTO\s+TABLE)|(?:INSERT(?:\s+IGNORE)?\s+INTO))\s+(?:\.*[`"]?([^.\s`"]+)[`"]?)*/i)
       return unless match
 
       table = match[1]
