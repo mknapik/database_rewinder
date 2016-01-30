@@ -63,10 +63,11 @@ module DatabaseRewinder
         end
       end or return
 
-      match = sql.match(/\A(?:(?:LOAD\s+DATA\s+LOCAL\s+INFILE\s+\S+\s+REPLACE\s+INTO\s+TABLE)|(?:INSERT(?:\s+IGNORE)?\s+INTO))\s+(?:\.*[`"]?([^.\s`"]+)[`"]?)*/i)
+      match = sql.match(insert_regex)
+
       return unless match
 
-      table = match[1]
+      table = match['table_name']
       if table
         cleaner.inserted_tables << table unless cleaner.inserted_tables.include? table
         cleaner.pool ||= connection.pool
@@ -89,6 +90,20 @@ module DatabaseRewinder
     def all_table_names(connection)
       db = connection.pool.spec.config[:database]
       @table_names_cache[db] ||= connection.tables.reject{|t| t == ActiveRecord::Migrator.schema_migrations_table_name }
+    end
+
+    private
+
+    def insert_regex
+      /\A
+        (
+          (?<load_data_infile>LOAD\s+DATA\s+((LOW_PRIORITY|CONCURRENT)\s+)?(LOCAL\s+)?INFILE\s+\S+\s+(REPLACE|IGNORE)\s+INTO\s+TABLE)
+          |
+          (?<insert>INSERT(\s+IGNORE)?\s+INTO)
+        )
+        \s+
+        (\.*[`"]?(?<table_name>[^.\s`"]+)[`"]?)*
+      /ix
     end
   end
 end
