@@ -2,7 +2,8 @@ module DatabaseRewinder
   class Cleaner
     attr_accessor :config, :connection_name, :only, :except, :inserted_tables, :pool
 
-    def initialize(config: nil, connection_name: nil, only: nil, except: nil)
+    def initialize(options = {})
+      config, connection_name, only, except = options.values_at(:config, :connection_name, :only, :except)
       @config, @connection_name, @only, @except = config, connection_name, Array(only), Array(except)
       reset
     end
