@@ -46,7 +46,13 @@ module DatabaseRewinder
 
       ar_conn.disable_referential_integrity do
         tables.each do |table_name|
-          ar_conn.execute "DELETE FROM #{ar_conn.quote_table_name(table_name)};"
+          begin
+            ar_conn.execute "DELETE FROM #{ar_conn.quote_table_name(table_name)};"
+          rescue Mysql2::Error, ActiveRecord::StatementInvalid => e
+            DatabaseRewinder.class_variable_set(:@@table_names_cache, {})
+            ar_conn.reconnect!
+            puts e
+          end
         end
       end
     end
