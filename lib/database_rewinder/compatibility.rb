@@ -12,7 +12,8 @@ module DatabaseRewinder
       cleaners.each {|c| c.strategy = nil, options}
     end
 
-    def [](orm, connection: nil, **)
+    def [](orm, options = {})
+      connection = options[:connection]
       if connection.nil?
         if orm.is_a? String
           connection = orm
@@ -29,7 +30,8 @@ module DatabaseRewinder
 
   class Cleaner
     module Compatibility
-      def clean_with(_strategy, only: nil, except: nil, **)
+      def clean_with(_strategy, options = {})
+        only, except = options.values_at(:only, :except)
         originals = @only, @except
         self.only, self.except = Array(only), Array(except)
         clean_all
